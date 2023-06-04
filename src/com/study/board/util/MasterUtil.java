@@ -1,4 +1,5 @@
 package com.study.board.util;
 
-public class MasterUtil {
+public abstract class MasterUtil {
+    public abstract void doAction(RequestUtil request);
 }
