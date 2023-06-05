@@ -15,8 +15,8 @@ public class Index { //게시판 실행하는곳
     //나중에 컨트롤러 이름으로 쉽게 찾아 사용하기위해 Map사용
     public void initControllers(){
         controllers=new HashMap<>();
-        controllers.put("build",new BuildController());
-        controllers.put("article",new ArticleController());
+        controllers.put("build", new BuildController());
+        controllers.put("article", new ArticleController());
     }
 
     public Index() {

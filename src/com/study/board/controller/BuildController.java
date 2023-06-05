@@ -1,5 +1,6 @@
 package com.study.board.controller;
 
+import com.study.board.pattern.DesignFactory;
 import com.study.board.service.BuildServcie;
 import com.study.board.util.MasterUtil;
 import com.study.board.util.RequestUtil;
@@ -7,8 +8,8 @@ import com.study.board.util.RequestUtil;
 public class BuildController  extends MasterUtil {
     private BuildServcie buildService;
 
-    public BuildController(BuildServcie buildService) {
-        this.buildService = buildService;
+    public BuildController() {
+        this.buildService = DesignFactory.getBuildServcie();
     }
 
     @Override
@@ -19,6 +20,6 @@ public class BuildController  extends MasterUtil {
     }
 
     private void actionSite(RequestUtil request){
-        buildService.buildsidte();
+        buildService.buildSite();
     }
 }
