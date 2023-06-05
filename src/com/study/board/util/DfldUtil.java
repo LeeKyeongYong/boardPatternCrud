@@ -61,7 +61,7 @@ public class DfldUtil {
         return rs;
     }
     //파일쓰기
-    private static void writeFileContents(String filePath, String contents) {
+    public static void writeFileContents(String filePath, String contents) {
         BufferedOutputStream bs=null;
         try{
             bs=new BufferedOutputStream(new FileOutputStream(filePath));
