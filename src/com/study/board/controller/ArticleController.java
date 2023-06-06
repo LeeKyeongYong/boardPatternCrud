@@ -1,17 +1,24 @@
 package com.study.board.controller;
 
+import com.study.board.model.ArticleDTO;
+import com.study.board.model.ArticleReplyDTO;
+import com.study.board.model.BoardDTO;
+import com.study.board.pattern.DesignFactory;
 import com.study.board.service.ArticleService;
 import com.study.board.util.MasterUtil;
+import com.study.board.util.RequestUtil;
 import com.sun.net.httpserver.Request;
+
+import java.util.List;
 
 public class ArticleController extends MasterUtil {
     private ArticleService articleService;
 
     public ArticleController() {
-        articleService = Factory.getArticleService();
+        articleService = DesignFactory.getArticleService();
     }
 
-    public void doAction(Request reqeust) {
+    public void doAction(RequestUtil reqeust) {
         if (reqeust.getActionName().equals("list")) {
             actionList(reqeust);
         } else if (reqeust.getActionName().equals("write")) {
@@ -30,7 +37,7 @@ public class ArticleController extends MasterUtil {
     }
 
     // 게시물 상세
-    private void actionDetail(Request reqeust) {
+    private void actionDetail(RequestUtil reqeust) {
         int id;
         try {
             id = Integer.parseInt(reqeust.getArg1());
@@ -39,19 +46,19 @@ public class ArticleController extends MasterUtil {
             return;
         }
 
-        Article article = articleService.getForPrintArticle(id);
+        ArticleDTO article = articleService.getForPrintArticle(id);
 
         if (article == null) {
             System.out.println("해당 게시물은 존재하지 않습니다.");
             return;
         }
 
-        List<ArticleReply> articleReplies = articleService.getForPrintArticleRepliesByArticleId(article.getId());
+        List<ArticleReplyDTO> articleReplies = articleService.getForPrintArticleRepliesByArticleId(article.getId());
         int repliesCount = articleReplies.size();
 
         System.out.printf("== %d번 게시물 상세 시작 ==\n", article.getId());
         System.out.printf("번호 : %d\n", article.getId());
-        System.out.printf("작성날짜 : %s\n", article.getRegDate());
+        System.out.printf("작성날짜 : %s\n", article.getWriteDate());
         System.out.printf("제목 : %s\n", article.getTitle());
         System.out.printf("내용 : %s\n", article.getBody());
         System.out.printf("댓글개수 : %d\n", repliesCount);
@@ -59,15 +66,15 @@ public class ArticleController extends MasterUtil {
 
         System.out.println("댓글을 작성 또는 삭제 하시겠습니까? <yes or no>");
         System.out.print("> ");
-        String yn = Factory.getScanner().nextLine().trim();
+        String yn = DesignFactory.getScanner().nextLine().trim();
         if (yn.equals("yes")) {
-            for (ArticleReply articleReply : articleReplies) {
+            for (ArticleReplyDTO articleReply : articleReplies) {
                 System.out.printf("%d번 댓글 : %s by %s\n", articleReply.getId(), articleReply.getBody(), "anonymous");
             }
             System.out.println("댓글 작성 - 1/ 댓글 삭제 - 2");
             System.out.println("> ");
-            int wd = Factory.getScanner().nextInt();
-            Factory.getScanner().nextLine();
+            int wd = DesignFactory.getScanner().nextInt();
+            DesignFactory.getScanner().nextLine();
 
             if (wd == 1) {
                 replyWrite(id);
@@ -89,7 +96,7 @@ public class ArticleController extends MasterUtil {
     private void replyWrite(int id) {
         System.out.println("댓글을 입력해주세요.");
         System.out.print("> ");
-        String replyText = Factory.getScanner().nextLine().trim();
+        String replyText = DesignFactory.getScanner().nextLine().trim();
 
         articleService.reply(id, replyText);
         System.out.println("댓글 작성이 완료되었습니다.");
@@ -99,10 +106,10 @@ public class ArticleController extends MasterUtil {
     private void replyDelete(int id) {
         System.out.println("몇번 댓글을 삭제하시겠습니까?");
         System.out.print("> ");
-        int delNum = Factory.getScanner().nextInt();
-        Factory.getScanner().nextLine();
+        int delNum = DesignFactory.getScanner().nextInt();
+        DesignFactory.getScanner().nextLine();
 
-        ArticleReply articleReply = articleService.getArticleReply(delNum);
+        ArticleReplyDTO articleReply = articleService.getArticleReply(delNum);
 
         if (articleReply == null) {
             System.out.println("해당 번호의 댓글이 존재하지 않습니다.");
@@ -115,33 +122,33 @@ public class ArticleController extends MasterUtil {
 
     // 현재 접속중인 보드
     private void actionCurrentBoard(Request reqeust) {
-        Board board = Factory.getSession().getCurrentBoard();
+        BoardDTO board = DesignFactory.getSession().getCurrentBoard();
         System.out.printf("현재 게시판 : %s\n", board.getName());
     }
 
     // 보드 변경
-    private void actionChangeBoard(Request reqeust) {
+    private void actionChangeBoard(RequestUtil reqeust) {
         String boardCode = reqeust.getArg1();
 
-        Board board = articleService.getBoardByCode(boardCode);
+        BoardDTO board = articleService.getBoardByCode(boardCode);
 
         if (board == null) {
             System.out.println("해당 게시판이 존재하지 않습니다.");
         } else {
             System.out.printf("%s 게시판으로 변경되었습니다.\n", board.getName());
-            Factory.getSession().setCurrentBoard(board);
+            DesignFactory.getSession().setCurrentBoard(board);
         }
     }
 
     // 게시물 리스트
     private void actionList(Request reqeust) {
-        Board currentBoard = Factory.getSession().getCurrentBoard();
-        List<Article> articles = articleService.getForPrintArticlesByBoardCode(currentBoard.getCode());
+        BoardDTO currentBoard = DesignFactory.getSession().getCurrentBoard();
+        List<ArticleDTO> articles = articleService.getForPrintArticlesByBoardCode(currentBoard.getCode());
 
         System.out.printf("== %s 게시물 리스트 시작 ==\n", currentBoard.getName());
         System.out.println("번호 |                날짜 |  제목");
-        for (Article article : articles) {
-            System.out.printf("%4d | %s | %s\n", article.getId(), article.getRegDate(), article.getTitle());
+        for (ArticleDTO article : articles) {
+            System.out.printf("%4d | %s | %s\n", article.getId(), article.getWriteDate(), article.getTitle());
         }
         System.out.printf("== %s 게시물 리스트 끝 ==\n", currentBoard.getName());
     }
@@ -149,12 +156,12 @@ public class ArticleController extends MasterUtil {
     // 게시물 작성
     private void actionWrite(Request reqeust) {
         System.out.printf("제목 : ");
-        String title = Factory.getScanner().nextLine();
+        String title = DesignFactory.getScanner().nextLine();
         System.out.printf("내용 : ");
-        String body = Factory.getScanner().nextLine();
+        String body = DesignFactory.getScanner().nextLine();
 
         // 현재 게시판 id 가져오기
-        int boardId = Factory.getSession().getCurrentBoard().getId();
+        int boardId = DesignFactory.getSession().getCurrentBoard().getId();
 
         int newId = articleService.write(boardId, title, body);
 
@@ -167,10 +174,10 @@ public class ArticleController extends MasterUtil {
         System.out.println("수정하실 게시물 번호를 입력해주세요.");
         System.out.print("> ");
 
-        int modiNum = Factory.getScanner().nextInt();
-        Factory.getScanner().nextLine();
+        int modiNum = DesignFactory.getScanner().nextInt();
+        DesignFactory.getScanner().nextLine();
 
-        Article article = articleService.getArticle(modiNum);
+        ArticleDTO article = articleService.getArticle(modiNum);
 
         if (article == null) {
             System.out.println("해당 게시물은 존재하지 않습니다.");
@@ -179,9 +186,9 @@ public class ArticleController extends MasterUtil {
 
         System.out.println("수정하실 제목과 내용을 입력해주세요.");
         System.out.printf("제목 : ");
-        String newTitle = Factory.getScanner().nextLine().trim();
+        String newTitle = DesignFactory.getScanner().nextLine().trim();
         System.out.printf("내용 : ");
-        String newBody = Factory.getScanner().nextLine().trim();
+        String newBody = DesignFactory.getScanner().nextLine().trim();
 
         articleService.modify(modiNum, newTitle, newBody);
 
@@ -193,10 +200,10 @@ public class ArticleController extends MasterUtil {
         System.out.println("삭제하실 게시물 번호를 입력해주세요.");
         System.out.print("> ");
 
-        int delNum = Factory.getScanner().nextInt();
-        Factory.getScanner().nextLine();
+        int delNum = DesignFactory.getScanner().nextInt();
+        DesignFactory.getScanner().nextLine();
 
-        Article article = articleService.getArticle(delNum);
+        ArticleDTO article = articleService.getArticle(delNum);
 
         if (article == null) {
             System.out.println("해당 게시물은 존재하지 않습니다.");
