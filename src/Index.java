@@ -34,7 +34,7 @@ public class Index { //게시판 실행하는곳
         //공지사항 게시판 생성
         DesignFactory.getArticleService().makeBoardIfNotExists("공지사항","b01");
         //자유게시판 생성
-        DesignFactory.getArticleService().makeBoardIfNotExists("공지사항","b02");
+        DesignFactory.getArticleService().makeBoardIfNotExists("자유게시판","b02");
 
         //현재 게시판을 1번게시판으로 선택
         DesignFactory.getSession().setCurrentBoard(DesignFactory.getArticleService().getBoard(1));
